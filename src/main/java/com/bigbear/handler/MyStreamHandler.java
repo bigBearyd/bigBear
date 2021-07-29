@@ -5,8 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class MyStreamHandler extends PumpStreamHandler {
 
   private static final Logger log = LoggerFactory.getLogger(MyStreamHandler.class);
 
-  public static final Map<String, Queue<String>> map = new HashMap<>();
+  public static final Map<String, List<String>> UUID_LOGS_MAP = new HashMap<>();
 
   private final String uuid;
 
@@ -42,15 +42,14 @@ public class MyStreamHandler extends PumpStreamHandler {
   protected Thread createPump(final InputStream is, final OutputStream os,
       final boolean closeWhenExhausted) {
     try {
-      log.info("进入myhandler");
+      log.info("进入myHandler");
       BufferedReader br = new BufferedReader(new InputStreamReader(is));
       String info;
       while ((info = br.readLine()) != null) {
-        Queue<String> queue = map.get(uuid);
-        queue.add(info);
+        UUID_LOGS_MAP.get(uuid).add(info);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("缓存实时日志异常", e);
     }
     return super.createPump(is, os, closeWhenExhausted);
   }

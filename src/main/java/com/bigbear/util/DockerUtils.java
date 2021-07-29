@@ -20,6 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 public class DockerUtils {
 
   private static final long WATCH_TIME_OUT = 1000 * 60 * 60 * 24L;
+  private static final String GET_CONTAINER_ID_COMMAND = "docker ps -a --filter 'name=%s' --format '{{.ID}}'";
+  private static final String STOP_CONTAINER_COMMAND = "docker stop %s";
+  private static final String REMOVE_CONTAINER_COMMAND = "docker rm %s";
+  private static final String QUERY_STATUS_CONTAINER_COMMAND = "docker ps -a --filter 'name=%s' --format '{{.Status}}'";
 
   private DockerUtils() {
   }
@@ -37,7 +41,7 @@ public class DockerUtils {
         ByteArrayOutputStream errorStream = new ByteArrayOutputStream()) {
       int execute = 0;
       if (isCreate) {
-        MyStreamHandler.map.put(uuid, new LinkedList<>());
+        MyStreamHandler.UUID_LOGS_MAP.put(uuid, new LinkedList<>());
         executor.setStreamHandler(new MyStreamHandler(outputStream, errorStream, uuid));
         executor.execute(cmdLine, new MyHandler(uuid));
       } else {
@@ -66,18 +70,38 @@ public class DockerUtils {
     return doExecute(command, false, null);
   }
 
-  public static void removeContainerByUuid(String uuid) {
+  public static void execCommandByUuid(String uuid, String command) {
 //    String command ="docker rm $(docker ps --all --filter 'name="+uuid+"' --format '{{.ID}}') ";
-    String getContainerIdCommend =
-        "docker ps -a --filter 'name=" + uuid + "' --format '{{.ID}}'";
+    String getContainerIdCommend = String.format(GET_CONTAINER_ID_COMMAND, uuid);
     ExecuteResult executeResult = DockerUtils.doOther(getContainerIdCommend);
     if (Boolean.TRUE.equals(executeResult.getSuccess()) && StringUtils
         .isNotBlank(executeResult.getResult())
     ) {
-      String rmContainerCommend = "docker rm " + executeResult.getResult();
-      DockerUtils.doOther(rmContainerCommend);
+      DockerUtils.doOther(String.format(command, executeResult.getResult()));
     } else {
-      log.error("{}容器清除失败：{}", uuid, executeResult.getException());
+      log.error("{}容器操作失败：{}", uuid, executeResult.getException());
     }
+  }
+
+  /**
+   * 终止任务
+   */
+  public static void stopByUuid(String uuid) {
+    execCommandByUuid(uuid, STOP_CONTAINER_COMMAND);
+  }
+
+
+  /**
+   * 查询任务状态
+   **/
+  public static void queryStatusByUuid(String uuid) {
+    doOther(String.format(QUERY_STATUS_CONTAINER_COMMAND, uuid));
+  }
+
+  /**
+   * 移除容器
+   **/
+  public static void rmContainerByUuid(String uuid) {
+    execCommandByUuid(uuid, REMOVE_CONTAINER_COMMAND);
   }
 }

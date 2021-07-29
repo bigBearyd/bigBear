@@ -31,8 +31,8 @@ public class MyHandler extends DefaultExecuteResultHandler {
     //docker rm $(docker ps -a --filter 'name=afea8187d8fa476a9006dd8e2675e818' --format '{{.ID}}')
     //docker ps -a --filter 'name=26b6538ace0a44cc9deb6b3ddf6decaf' --format '{{.ID}}' | xargs docker rm
     log.info("handler invoke on complete:{}", exitValue);
-    MyStreamHandler.map.remove(uuid);
-    DockerUtils.removeContainerByUuid(this.uuid);
+    MyStreamHandler.UUID_LOGS_MAP.remove(uuid);
+    DockerUtils.rmContainerByUuid(this.uuid);
     super.onProcessComplete(exitValue);
   }
 

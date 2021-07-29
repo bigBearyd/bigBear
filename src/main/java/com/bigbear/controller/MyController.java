@@ -1,7 +1,10 @@
 package com.bigbear.controller;
 
 import com.bigbear.handler.MyStreamHandler;
+import com.bigbear.response.QueryLogResponse;
 import com.bigbear.util.DockerUtils;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,13 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class MyController {
 
   @GetMapping("/create")
-  public String create(){
+  public String create() {
     return this.testCreate();
   }
 
-  @GetMapping("/log/{key}")
-  public String logs(@PathVariable String key){
-    return MyStreamHandler.map.get(key).poll();
+  @GetMapping("/log/{key}/{start}")
+  public QueryLogResponse logs(@PathVariable("key") String key,
+      @PathVariable("start") Integer start) {
+    List<String> logs = MyStreamHandler.UUID_LOGS_MAP.get(key);
+    if (logs == null) {
+      return QueryLogResponse.builder().content(Collections.emptyList()).end(-1).readStatus(1)
+          .build();
+    }
+    int size = logs.size();
+    return QueryLogResponse.builder().content(logs.subList(start + 1, size)).end(size - 1)
+        .readStatus(0).build();
   }
 
   /**
@@ -36,7 +47,7 @@ public class MyController {
     String uuid = UUID.randomUUID().toString().replaceAll("-", "");
     //选用后台执行
     String command =
-        "docker run --name " + uuid + " short";
+        "docker run --name " + uuid + " ppp";
 //        "docker run --name " + uuid + " -d ppp";
 //    String command = "docker run ppp";
 //    2。已有容器，直接启动不新建（每次的任务都不一样）

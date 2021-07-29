@@ -10,13 +10,22 @@
 
 </body>
 <script>
-  self.setInterval("myfunc()",1000);
-  function myfunc(){
+  var cc = 0;
+  var timer = self.setInterval("myfunc(cc)",1000);
+  function myfunc(pp){
     $.ajax({
-      url:"http://localhost:8080/log/"+"827f8e0b81374d099e0fbbf3ee556535",
+      url:"http://localhost:8080/log/"+"a31be9a65db8435ca0932d55617ee1bc/"+pp,
       type:"GET",
       success:function(re){
-        console.log(re);
+        var content = re.content;
+        var end = re.end;
+        var reads = re.readStatus;
+        if(reads === 1){
+          clearInterval(timer);
+        }else {
+          cc = end;
+        }
+        console.log(content);
       }
     });
   }
