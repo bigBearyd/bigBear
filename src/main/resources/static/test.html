@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+</head>
+<body>
+
+</body>
+<script>
+  self.setInterval("myfunc()",1000);
+  function myfunc(){
+    $.ajax({
+      url:"http://localhost:8080/log/"+"827f8e0b81374d099e0fbbf3ee556535",
+      type:"GET",
+      success:function(re){
+        console.log(re);
+      }
+    });
+  }
+</script>
+</html>
