@@ -1,6 +1,7 @@
 package com.bigbear.controller;
 
 import com.bigbear.handler.MyStreamHandler;
+import com.bigbear.response.ExecuteResult;
 import com.bigbear.response.QueryLogResponse;
 import com.bigbear.util.DockerUtils;
 import java.util.Collections;
@@ -21,11 +22,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MyController {
 
+  /**
+   * 创建容器
+   **/
   @GetMapping("/create")
   public String create() {
     return this.testCreate();
   }
 
+  /**
+   * 实时日志
+   **/
   @GetMapping("/log/{key}/{start}")
   public QueryLogResponse logs(@PathVariable("key") String key,
       @PathVariable("start") Integer start) {
@@ -47,7 +54,7 @@ public class MyController {
     String uuid = UUID.randomUUID().toString().replaceAll("-", "");
     //选用后台执行
     String command =
-        "docker run --name " + uuid + " ppp";
+        "docker run --name " + uuid + " excep";
 //        "docker run --name " + uuid + " -d ppp";
 //    String command = "docker run ppp";
 //    2。已有容器，直接启动不新建（每次的任务都不一样）
@@ -62,97 +69,30 @@ public class MyController {
   /**
    * 终止任务
    */
-//  public void testStop() {
-////    String command = "docker container stop " + CONTAINER_ID;
-////    this.execute(command,false);
-//  }
-//
-//
-//  /**
-//   * 查询任务状态
-//   **/
-//  public void testQueryStatus() throws Exception {
-////    String command = "docker ps -a --filter 'id="+CONTAINER_ID+"'";
-
-////    String command = "docker ps -a --filter 'id=" + CONTAINER_ID + "' --format '{{.Status}}'";
-//
-////    this.execute(command,false);
-//  }
-//
-//  public void testLog() throws Exception {
-////    String command = "docker logs -f " + CONTAINER_ID;
-////    String command = "docker container logs "+CONTAINER_ID;
-//    // TODO: 2021/7/23 怎么实时打印日志
-////    ExecuteResult execute = this.execute(command);
-////    ExecuteResult executeResult = this.doExecute(command, false);
-////    System.out.println("execute.getException() = " + execute.getException());
-//  }
+  @GetMapping("/stop/{uuid}")
+  public void testStop(@PathVariable String uuid) {
+    DockerUtils.stopByUuid(uuid);
+  }
 
 
-//  private ExecuteResult execute(String command, boolean isCreate) {
-//    ExecuteResult executeResult = this.doExecute(command, isCreate);
-//    if (executeResult.getSuccess()) {
-//      String result = executeResult.getResult();
-//      log.info("执行成功：{}", result);
-//    } else {
-//      log.error("执行异常：{}", executeResult.getException());
-//    }
-//    return executeResult;
-//  }
 
-//  private ExecuteResult doExecute(String command, boolean isCreate) {
-//    CommandLine cmdLine = CommandLine.parse(command);
-//    DefaultExecutor executor = new DefaultExecutor();
-//    executor.setExitValues(null);
-//    //超时时间为一天
-//    ExecuteWatchdog watchdog = new ExecuteWatchdog(1000 * 60 * 60 * 24);
-//    executor.setWatchdog(watchdog);
-//
-//    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        ByteArrayOutputStream errorStream = new ByteArrayOutputStream();) {
-////      PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, errorStream);
-//      executor.setStreamHandler(new MyStreamHandler(outputStream, errorStream));
-//      //这边日志查询的时候需要特殊处理
-//      int execute = executor.execute(cmdLine);
-//      System.out.println("execute = " + execute);
-//      String out = outputStream.toString("gbk");//获取程序外部程序执行结果
-//      System.out.println("out = " + out);
-//      String error = errorStream.toString("gbk");
-//      System.out.println("error = " + error);
-//      return new ExecuteResult.Builder().code(execute).result(out).exception(error).build();
-//    } catch (Exception e) {
-//      log.error("command exec exception", e);
-//    }
-//    return ExecuteResult.defaultResult();
-//
-//  }
+  /**
+   * 查询任务状态
+   **/
+  @GetMapping("/query_status/{uuid}")
+  public void testQueryStatus(@PathVariable String uuid){
+    ExecuteResult executeResult = DockerUtils.queryStatusByUuid(uuid);
+    if(Boolean.TRUE.equals(executeResult.getSuccess())){
+      log.info("status:{}", executeResult.getResult());
+    }
+  }
 
-//  private ExecuteResult asyncDoExecute(String command, boolean isCreate, String uuid) {
-//    CommandLine cmdLine = CommandLine.parse(command);
-//    DefaultExecutor executor = new DefaultExecutor();
-//    executor.setExitValues(null);
-//    ExecuteWatchdog watchdog = new ExecuteWatchdog(60000);
-//    executor.setWatchdog(watchdog);
-//
-//    try  {
-//      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//      ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-////      PumpStreamHandler streamHandler = new PumpStreamHandler(outputStream, errorStream);
-//
-////      executor.setStreamHandler(streamHandler);
-//      executor.setStreamHandler(new MyStreamHandler(outputStream, errorStream,uuid));
-//      MyStreamHandler.map.put(uuid,new LinkedList<>());
-//      executor.execute(cmdLine, new MyHandler(uuid));
-//
-//      String out = outputStream.toString("gbk");//获取程序外部程序执行结果
-//      System.out.println("out = " + out);
-//      String error = errorStream.toString("gbk");
-//      System.out.println("error = " + error);
-//      System.out.println("async execute success");
-//    } catch (Exception e) {
-//      log.error("command exec exception", e);
-//    }
-//    return ExecuteResult.defaultResult();
-//
-//  }
+  /**
+   * 全量日志
+   **/
+  @GetMapping("/log_all/{uuid}")
+  public void testAllLog(@PathVariable String uuid){
+    DockerUtils.queryAllLogsByUuid(uuid);
+  }
+
 }

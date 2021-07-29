@@ -24,6 +24,7 @@ public class DockerUtils {
   private static final String STOP_CONTAINER_COMMAND = "docker stop %s";
   private static final String REMOVE_CONTAINER_COMMAND = "docker rm %s";
   private static final String QUERY_STATUS_CONTAINER_COMMAND = "docker ps -a --filter 'name=%s' --format '{{.Status}}'";
+  private static final String QUERY_ALL_LOG_COMMAND = "docker logs %s";
 
   private DockerUtils() {
   }
@@ -71,6 +72,10 @@ public class DockerUtils {
   }
 
   public static void execCommandByUuid(String uuid, String command) {
+    if(StringUtils.isAnyBlank(uuid, command)){
+      log.error("uuid或命令行为空");
+      return;
+    }
 //    String command ="docker rm $(docker ps --all --filter 'name="+uuid+"' --format '{{.ID}}') ";
     String getContainerIdCommend = String.format(GET_CONTAINER_ID_COMMAND, uuid);
     ExecuteResult executeResult = DockerUtils.doOther(getContainerIdCommend);
@@ -79,7 +84,7 @@ public class DockerUtils {
     ) {
       DockerUtils.doOther(String.format(command, executeResult.getResult()));
     } else {
-      log.error("{}容器操作失败：{}", uuid, executeResult.getException());
+      log.error("{}容器操作失败或无需操作：{}", uuid, executeResult.getException());
     }
   }
 
@@ -88,14 +93,15 @@ public class DockerUtils {
    */
   public static void stopByUuid(String uuid) {
     execCommandByUuid(uuid, STOP_CONTAINER_COMMAND);
+    execCommandByUuid(uuid, REMOVE_CONTAINER_COMMAND);
   }
 
 
   /**
    * 查询任务状态
    **/
-  public static void queryStatusByUuid(String uuid) {
-    doOther(String.format(QUERY_STATUS_CONTAINER_COMMAND, uuid));
+  public static ExecuteResult queryStatusByUuid(String uuid) {
+    return doOther(String.format(QUERY_STATUS_CONTAINER_COMMAND, uuid));
   }
 
   /**
@@ -103,5 +109,12 @@ public class DockerUtils {
    **/
   public static void rmContainerByUuid(String uuid) {
     execCommandByUuid(uuid, REMOVE_CONTAINER_COMMAND);
+  }
+
+  /**
+   * 查询全量日志
+   **/
+  public static void queryAllLogsByUuid(String uuid) {
+    execCommandByUuid(uuid, QUERY_ALL_LOG_COMMAND);
   }
 }
