@@ -1,6 +1,7 @@
 package com.bigbear;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author li
  * @description
  */
+@MapperScan("com.bigbear.**/mapper/**")
 @SpringBootApplication
 public class BigBearApplication {
 
