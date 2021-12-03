@@ -1,9 +1,14 @@
 package com.bigbear;
 
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.bigbear.handler.MyHandler;
 import com.bigbear.handler.MyStreamHandler;
 import com.bigbear.response.ExecuteResult;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
 import java.util.UUID;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -137,6 +142,21 @@ public class DockerTest {
       log.error("command exec exception", e);
     }
     return ExecuteResult.defaultResult();
+
+  }
+
+
+  @Test
+  public void testiii() throws Exception {
+    HttpResponse execute = HttpRequest.get(
+        "https://cdp-dev-admin.zampdmp.com/open/wecom/chatData/getMedia?id=27&fileId=CtsDKjEqSHRKUjBGaDR1ZWpMT3NGZTJDTUlnOTdJSVZWUzh3K1U0bUtBV2JRRENMV0NCakw1TjNwZk5RMllOc2lWditSTlgxUUJ6VXhwaXJnMVhxeG8yYm1jaFZySzFzSjZENnRrUWwza0hLeGUrNG5TUUJkZ1d2VmFSTGJDVWxUZ3Y3eWRsdlljMkFLU1JjMmJiQnlHV1cxa0JHeko5VUpTZVEzNWNIYkl3dzFVdkRsNGk4VjlmdkFFT2tjd2hGMmFnNFV2RVk5MG1iY3I2MmFHUEM4bUpLcUR6anZndmhJVDdHUDczcmJJWHR4OFU1SU91aVB0eXlMYklMRnhEQ21ocm92eTB4QXpjVUljcWlLQ1hjVitmZHlxMWkzZFpHK2lSeFZ3U00vdXkyNXZ4WVA1Y3Z2YVNWVXZVdE5FblBFeCtPSHJuYW4yTjZKNGcremRoN3A3Kytpbjd2WkhEYWtzUGZpUGhZWDdXSXhYOWJ1ckFTMjBVTVZkSzdTSVRWM1B2V2pmVUVqT0JMSEdVaURMSUJnWXlkMTJXOHNzVURhU0NQTTN4MElSZDM5aDRPNVdONVhibG41TlRGL2ZIZVl1SkZlTzJxYlE4YnIxVkErakJickxoR05ibWc9PRI0TkRkZk1UWTRPRGcxTnpVeU1qSTBPRFkxTVY4NU9URTNOREUzT1Y4eE5qTTBOVFF3TURNMhogNmY3OTY4NzA2MTZlNjU3Mjc0N2E2MTY5NzQ2MTY2NjY=")
+        .execute();
+    InputStream inputStream = execute.bodyStream();
+    File file = new File("my.mp3");
+    file.createNewFile();
+    System.out.println("file.getAbsolutePath() = " + file.getAbsolutePath());
+    FileUtil.writeFromStream(inputStream, file);
+
 
   }
 
